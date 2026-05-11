@@ -7,11 +7,8 @@
 /data/raw_prices/*
 /data/processed/*
 !/data/raw_fundamentals/.gitkeep
-!/data/raw_fundamentals/README.md
 !/data/raw_prices/.gitkeep
-!/data/raw_prices/README.md
 !/data/processed/.gitkeep
-!/data/processed/README.md
 
 # Generated outputs
 /output/

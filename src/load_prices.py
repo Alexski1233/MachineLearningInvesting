@@ -1,0 +1,29 @@
+from pathlib import Path
+import pandas as pd
+
+RAW_PRICES = Path(__file__).resolve().parents[1] / "data" / "raw_prices"
+
+
+def load_all_prices() -> pd.DataFrame:
+    """Read every CSV in data/raw_prices and return one tidy long-format frame.
+
+    Each row is one (ticker, date) bar. 
+    Rows are sorted by ticker then date so later groupby/rolling operations are stable.
+    """
+    frames = [pd.read_csv(csv, parse_dates=["date"]) for csv in sorted(RAW_PRICES.glob("*.csv"))]
+    out = pd.concat(frames, ignore_index=True)
+    return out.sort_values(["ticker", "date"]).reset_index(drop=True)
+
+
+def summarize(df: pd.DataFrame) -> None:
+    """Print a one-glance summary: row count, ticker count, date range."""
+    print(f"Rows:        {len(df):,}")
+    print(f"Tickers:     {df['ticker'].nunique()}")
+    print(f"Date range:  {df['date'].min().date()} -> {df['date'].max().date()}")
+
+
+if __name__ == "__main__":
+    df = load_all_prices()
+    print(df.head())
+    print()
+    summarize(df)

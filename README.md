@@ -1,8 +1,6 @@
 # Machine Learning Investing
 
-Private research project for testing Nordic equity data workflows.
-
-This repo is intentionally a clean project shell. It does not include proprietary market data, LSEG/Refinitiv exports, generated outputs, or local strategy experiments. Put local data into the folders below and build experiments from there.
+Private research project for testing Nordic equity data workflows. The goal is to use machine learning to pick stocks on a trading platform.
 
 ## Folder Structure
 
@@ -10,11 +8,33 @@ This repo is intentionally a clean project shell. It does not include proprietar
 data/
   universe_oslo.csv          # ticker/universe list
   raw_fundamentals/          # local LSEG/Refinitiv Excel exports, not committed
-  raw_prices/                # local price exports, not committed
+  raw_prices/                # local price CSV exports, not committed
   processed/                 # cleaned datasets, not committed
-notebooks/                   # local notebooks, add as needed
-scripts/                     # local scripts, add as needed
-docs/                        # notes about data format and workflow
+src/                         # pipeline code (load, features, model, run)
+environment.yml              # conda environment definition
+```
+
+## Install & run
+
+Create the conda environment (one-time):
+
+```bash
+conda env create -f environment.yml
+```
+
+Activate it and run the end-to-end pipeline:
+
+```bash
+conda activate mlinvest
+python src/main.py
+```
+
+This loads every CSV in `data/raw_prices/`, builds features, trains a gradient-boosted model on pre-2020 data, backtests a long-top-5 rebalancing rule, and prints today's BUY picks to paste into the paper-trading site.
+
+To update an existing environment after editing `environment.yml`:
+
+```bash
+conda env update -f environment.yml --prune
 ```
 
 ## Local Data
