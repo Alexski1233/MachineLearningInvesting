@@ -1,4 +1,10 @@
-from model import TOP_N, backtest_top_n, build_dataset, train_and_predict
+from model import (
+    TOP_N,
+    backtest_top_n,
+    build_dataset,
+    holding_period_sweep,
+    train_and_predict,
+)
 
 
 def latest_signals(test, n: int = TOP_N):
@@ -30,6 +36,20 @@ def print_backtest_summary(bt) -> None:
     )
 
 
+def print_holding_period_sweep(sweep) -> None:
+    """Print robustness check across alternative holding periods."""
+    print("--- Holding-period robustness ---")
+    if sweep.empty:
+        print("No complete holding-period results.")
+        return
+
+    out = sweep.copy()
+    out["avg_ret"] = out["avg_ret"].map("{:.2%}".format)
+    out["total_return"] = out["total_return"].map("{:.1%}".format)
+    out["ear"] = out["ear"].map("{:.1%}".format)
+    print(out.to_string(index=False))
+
+
 def main() -> None:
     """End-to-end demo: load -> features -> train -> backtest -> today's BUYs."""
     df = build_dataset()
@@ -40,6 +60,10 @@ def main() -> None:
     bt = backtest_top_n(test)
     print()
     print_backtest_summary(bt)
+
+    sweep = holding_period_sweep(test)
+    print()
+    print_holding_period_sweep(sweep)
 
     last_date, picks = latest_signals(test)
     print()
