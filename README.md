@@ -1,82 +1,61 @@
 # Machine Learning Investing
 
-Private research project for testing Nordic equity data workflows. The goal is to use machine learning to pick stocks on a trading platform.
+Research code for testing a machine learning stock picker on Nordic equity data.
+The script trains on local price files, evaluates on unseen data, backtests a simple top 5 rule, and prints the latest paper trading candidates.
 
-## Folder Structure
+## Install
 
-```text
-data/
-  universe_oslo.csv          # ticker/universe list
-  raw_fundamentals/          # local LSEG/Refinitiv Excel exports, not committed
-  raw_prices/                # local price CSV exports, not committed
-  processed/                 # cleaned datasets, not committed
-src/                         # pipeline code (load, features, model, run)
-environment.yml              # conda environment definition
-```
-
-## Install & run
-
-Create the conda environment (one-time):
+Create the conda environment once.
 
 ```bash
 conda env create -f environment.yml
 ```
 
-Activate it and run the end-to-end pipeline:
+Activate it.
 
 ```bash
 conda activate mlinvest
-python src/main.py
 ```
 
-This loads every CSV in `data/raw_prices/`, builds features, trains a gradient-boosted model on pre-2020 data, backtests a long-top-5 rebalancing rule, and prints today's BUY picks to paste into the paper-trading site.
-
-To update an existing environment after editing `environment.yml`:
+Update an existing environment after dependency changes.
 
 ```bash
 conda env update -f environment.yml --prune
 ```
 
-## Local Data
+## Run
 
-Do not commit licensed data files. Keep them local in:
-
-```text
-data/raw_fundamentals/
-data/raw_prices/
-data/processed/
+```bash
+python src/main.py
 ```
 
-Suggested LSEG fundamental export per stock:
+Input price files live in `data/raw_prices/`. Each CSV should have at least `ticker`, `date`, `adj_close`, and `volume`.
 
-```text
-Balance Sheet
-Income Statement
-Cash Flow
-Quarterly
-Longest history available
-Standardized currency
-```
+## What It Does
 
-Suggested price/market export per stock:
+The pipeline loads all price CSVs, builds price based features, trains several candidate models, and selects the best model on validation data.
+The 2020 onward period is kept for unseen testing.
 
-```text
-Adjusted close or total return index
-Close price
-Volume
-Shares outstanding
-Market cap
-Enterprise value
-P/E
-P/B
-EV/EBITDA
-Dividend yield
-```
+Features include momentum, volatility, trend, drawdown, liquidity, and same day cross sectional ranks. The label is the next 20 trading day return for the same stock.
 
-## Universe
+The candidate models are ridge regression, random forest, extra trees, histogram gradient boosting, and Huber loss gradient boosting.
+This model set follows common empirical asset pricing practice.
+Gu, Kelly, and Xiu compare similar machine learning models in [The Review of Financial Studies](https://academic.oup.com/rfs/article/33/5/2223/5758276).
 
-The initial universe is 25 Norwegian stocks in `data/universe_oslo.csv`. This is only a starting point; adjust it locally if needed.
+## Output
 
-## Notes
+The script prints progress while it loads data and trains models.
 
-This is not investment advice and not a portfolio recommendation. The point is to keep a reproducible local research setup where different people can test their own ideas without publishing paid/proprietary data.
+`Data` shows the number of rows, number of tickers, date range, and whether the latest local price file is fresh.
+
+`Model Selection` shows validation results from the pre 2020 period. The selected model is trained again on all eligible pre 2020 data.
+
+`Unseen Test Accuracy` reports accuracy from 2020 onward.
+Direction accuracy measures whether the model got the return sign right.
+Top 5 hit rate measures how often selected stocks had positive forward returns.
+Rank IC measures whether the model ranked better stocks higher.
+OOS R squared tests exact return prediction against the training mean.
+
+`Backtest` simulates buying the top 5 names every 20 trading days. It compares the strategy with an equal weighted universe benchmark.
+
+`Top 5 BUY Picks` is the latest ranked list for paper trading. Treat `Pred 20d` as a ranking score, not a precise return forecast.
