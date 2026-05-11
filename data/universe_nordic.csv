@@ -1,0 +1,68 @@
+ticker,yahoo_symbol,name,market,currency
+EQNR,EQNR.OL,Equinor,Oslo,NOK
+DNB,DNB.OL,DNB Bank,Oslo,NOK
+NHY,NHY.OL,Norsk Hydro,Oslo,NOK
+TEL,TEL.OL,Telenor,Oslo,NOK
+YAR,YAR.OL,Yara International,Oslo,NOK
+ORK,ORK.OL,Orkla,Oslo,NOK
+AKRBP,AKRBP.OL,Aker BP,Oslo,NOK
+MOWI,MOWI.OL,Mowi,Oslo,NOK
+KOG,KOG.OL,Kongsberg Gruppen,Oslo,NOK
+GJF,GJF.OL,Gjensidige,Oslo,NOK
+STB,STB.OL,Storebrand,Oslo,NOK
+SALM,SALM.OL,SalMar,Oslo,NOK
+TOM,TOM.OL,Tomra,Oslo,NOK
+SUBC,SUBC.OL,Subsea 7,Oslo,NOK
+NOD,NOD.OL,Nordic Semiconductor,Oslo,NOK
+FRO,FRO.OL,Frontline,Oslo,NOK
+ELK,ELK.OL,Elkem,Oslo,NOK
+BRG,BRG.OL,Borregaard,Oslo,NOK
+PROT,PROT.OL,Protector Forsikring,Oslo,NOK
+VEI,VEI.OL,Veidekke,Oslo,NOK
+VAR,VAR.OL,Var Energi,Oslo,NOK
+MPCC,MPCC.OL,MPC Container Ships,Oslo,NOK
+AFG,AFG.OL,AF Gruppen,Oslo,NOK
+ATEA,ATEA.OL,Atea,Oslo,NOK
+VEND,VEND.OL,Vend Marketplaces,Oslo,NOK
+VOLV_B,VOLV-B.ST,Volvo B,Stockholm,SEK
+ATCO_A,ATCO-A.ST,Atlas Copco A,Stockholm,SEK
+ATCO_B,ATCO-B.ST,Atlas Copco B,Stockholm,SEK
+INVE_B,INVE-B.ST,Investor B,Stockholm,SEK
+ASSA_B,ASSA-B.ST,Assa Abloy B,Stockholm,SEK
+SEB_A,SEB-A.ST,SEB A,Stockholm,SEK
+SHB_A,SHB-A.ST,Handelsbanken A,Stockholm,SEK
+SWED_A,SWED-A.ST,Swedbank A,Stockholm,SEK
+HM_B,HM-B.ST,Hennes and Mauritz B,Stockholm,SEK
+ERIC_B,ERIC-B.ST,Ericsson B,Stockholm,SEK
+SAND,SAND.ST,Sandvik,Stockholm,SEK
+SKF_B,SKF-B.ST,SKF B,Stockholm,SEK
+HEXA_B,HEXA-B.ST,Hexagon B,Stockholm,SEK
+ALFA,ALFA.ST,Alfa Laval,Stockholm,SEK
+ABB,ABB.ST,ABB,Stockholm,SEK
+NIBE_B,NIBE-B.ST,Nibe B,Stockholm,SEK
+ESSITY_B,ESSITY-B.ST,Essity B,Stockholm,SEK
+TELIA,TELIA.ST,Telia,Stockholm,SEK
+EVO,EVO.ST,Evolution,Stockholm,SEK
+NOVO_B,NOVO-B.CO,Novo Nordisk B,Copenhagen,DKK
+MAERSK_B,MAERSK-B.CO,AP Moller Maersk B,Copenhagen,DKK
+DSV,DSV.CO,DSV,Copenhagen,DKK
+ORSTED,ORSTED.CO,Orsted,Copenhagen,DKK
+CARL_B,CARL-B.CO,Carlsberg B,Copenhagen,DKK
+DANSKE,DANSKE.CO,Danske Bank,Copenhagen,DKK
+NSIS_B,NSIS-B.CO,Novonesis B,Copenhagen,DKK
+PNDORA,PNDORA.CO,Pandora,Copenhagen,DKK
+VWS,VWS.CO,Vestas Wind Systems,Copenhagen,DKK
+COLO_B,COLO-B.CO,Coloplast B,Copenhagen,DKK
+GMAB,GMAB.CO,Genmab,Copenhagen,DKK
+NOKIA,NOKIA.HE,Nokia,Helsinki,EUR
+NESTE,NESTE.HE,Neste,Helsinki,EUR
+KNEBV,KNEBV.HE,Kone B,Helsinki,EUR
+SAMPO,SAMPO.HE,Sampo,Helsinki,EUR
+UPM,UPM.HE,UPM-Kymmene,Helsinki,EUR
+STERV,STERV.HE,Stora Enso R,Helsinki,EUR
+METSO,METSO.HE,Metso,Helsinki,EUR
+FORTUM,FORTUM.HE,Fortum,Helsinki,EUR
+WRT1V,WRT1V.HE,Wartsila,Helsinki,EUR
+ELISA,ELISA.HE,Elisa,Helsinki,EUR
+KESKOB,KESKOB.HE,Kesko B,Helsinki,EUR
+VALMT,VALMT.HE,Valmet,Helsinki,EUR

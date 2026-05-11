@@ -31,6 +31,12 @@ python src/main.py
 
 Input price files live in `data/raw_prices/`. Each CSV should have at least `ticker`, `date`, `adj_close`, and `volume`.
 
+To refresh the Nordic Yahoo Finance price files, run this before the model.
+
+```bash
+python src/fetch_prices.py
+```
+
 ## What It Does
 
 The pipeline loads all price CSVs, builds price based features, trains several candidate models, and selects the best model on validation data.
