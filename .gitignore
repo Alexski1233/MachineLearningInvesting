@@ -1,0 +1,36 @@
+# Local/proprietary data
+/data/NorskeBørs/
+/data/NorskeBors/
+/data/prices/
+/data/yahoo_prices/
+/data/raw_fundamentals/*
+/data/raw_prices/*
+/data/processed/*
+!/data/raw_fundamentals/.gitkeep
+!/data/raw_fundamentals/README.md
+!/data/raw_prices/.gitkeep
+!/data/raw_prices/README.md
+!/data/processed/.gitkeep
+!/data/processed/README.md
+
+# Generated outputs
+/output/
+/.mplconfig/
+/.cache/
+
+# Local experiment scripts; kept private by default
+/fetch_yahoo_prices.py
+/fundamental_backtest.py
+/ml_factor_strategy.py
+/nordic_backtest.py
+/parse_fundamentals.py
+/value_backtest.py
+
+# Python/system
+__pycache__/
+*.py[cod]
+.DS_Store
+*.log
+.env
+.venv/
+venv/
