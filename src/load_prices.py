@@ -10,7 +10,7 @@ def load_all_prices() -> pd.DataFrame:
     Each row is one (ticker, date) bar. 
     Rows are sorted by ticker then date so later groupby/rolling operations are stable.
     """
-    frames = [pd.read_csv(csv, parse_dates=["date"]) for csv in sorted(RAW_PRICES.glob("*.csv"))]
+    frames = [pd.read_csv(csv, parse_dates=["date"], dtype={"ticker": str, "yahoo_symbol": str}) for csv in sorted(RAW_PRICES.glob("*.csv"))]
     out = pd.concat(frames, ignore_index=True)
     return out.sort_values(["ticker", "date"]).reset_index(drop=True)
 

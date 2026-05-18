@@ -6,7 +6,7 @@ from sklearn.linear_model import Ridge
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
-from features import FEATURE_COLS, add_features
+from features import BASE_FEATURE_COLS, FEATURE_COLS, add_features
 from load_prices import load_all_prices
 
 TRAIN_TEST_SPLIT = "2020-01-01"
@@ -15,6 +15,10 @@ REBALANCE_EVERY_DAYS = 20
 HOLDING_PERIODS = [10, 20, 30, 60]
 TRADING_DAYS_PER_YEAR = 252
 TOP_N = 5
+MIN_HISTORY_DAYS = 504
+MIN_PRICE = 1.0
+LIQUIDITY_LOOKBACK_DAYS = 60
+MIN_TURNOVER_60D_MEDIAN = 1_000_000
 PERIODS_PER_YEAR = 252 / REBALANCE_EVERY_DAYS
 TARGET_COL = "fwd_ret_20d"
 LABEL_DATE_COL = "label_date_20d"
@@ -24,7 +28,31 @@ def build_dataset() -> pd.DataFrame:
     """Load raw prices, build features, drop rows where any feature is missing."""
     prices = load_all_prices()
     feats = add_features(prices)
+    feats = filter_liquid_rows(feats)
+    feats = rerank_features(feats)
     return feats.dropna(subset=FEATURE_COLS).reset_index(drop=True)
+
+
+def filter_liquid_rows(df: pd.DataFrame) -> pd.DataFrame:
+    """Keep rows where the stock is seasoned and liquid enough to trade."""
+    out = df.sort_values(["ticker", "date"]).copy()
+    turnover = out["close"] * out["volume"]
+    out["turnover_60d_median"] = turnover.groupby(out["ticker"]).transform(lambda s: s.rolling(LIQUIDITY_LOOKBACK_DAYS).median())
+    out["history_days"] = out.groupby("ticker").cumcount() + 1
+    mask = (
+        (out["history_days"] >= MIN_HISTORY_DAYS)
+        & (out["adj_close"] >= MIN_PRICE)
+        & (out["turnover_60d_median"] >= MIN_TURNOVER_60D_MEDIAN)
+    )
+    return out[mask].copy()
+
+
+def rerank_features(df: pd.DataFrame) -> pd.DataFrame:
+    """Rebuild cross-sectional ranks after the liquidity filter."""
+    out = df.copy()
+    for col in BASE_FEATURE_COLS:
+        out[f"{col}_xrank"] = out.groupby("date")[col].rank(pct=True)
+    return out
 
 
 def model_candidates(random_state: int = 0) -> dict:

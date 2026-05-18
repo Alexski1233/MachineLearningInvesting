@@ -7,7 +7,7 @@ import requests
 
 ROOT = Path(__file__).resolve().parents[1]
 RAW_PRICES = ROOT / "data" / "raw_prices"
-UNIVERSE = ROOT / "data" / "universe_nordic.csv"
+UNIVERSE = ROOT / "data" / "universe_oslo.csv"
 
 
 def unix_date(year: int, month: int, day: int) -> int:

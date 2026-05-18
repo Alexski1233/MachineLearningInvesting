@@ -1,21 +1,176 @@
-query
-EQUINOR
-DNB BANK
-MOWI
-TELENOR
-YARA INTERNATIONAL
-AKER BP
-ORKLA
-NORSK HYDRO
-KONGSBERG GRUPPEN
-GJENSIDIGE
-SALMAR
-TOMRA
-STOREBRAND
-SUBSEA 7
-NORDIC SEMICONDUCTOR
-VAR ENERGI
-FRONTLINE
-MPC CONTAINER SHIPS
-ELKEM
-BORREGAARD
+ticker,yahoo_symbol,name,market,currency
+2020,2020.OL,2020 Bulkers Ltd.,Oslo,NOK
+ABG,ABG.OL,ABG Sundal Collier Holding ASA,Oslo,NOK
+ABL,ABL.OL,ABL Group ASA,Oslo,NOK
+AFG,AFG.OL,AF Gruppen ASA,Oslo,NOK
+AGLX,AGLX.OL,Agilyx ASA,Oslo,NOK
+AKAST,AKAST.OL,Akastor ASA,Oslo,NOK
+AKER,AKER.OL,Aker ASA,Oslo,NOK
+AKBM,AKBM.OL,Aker BioMarine ASA,Oslo,NOK
+AKRBP,AKRBP.OL,Aker BP ASA,Oslo,NOK
+AKSO,AKSO.OL,Aker Solutions ASA,Oslo,NOK
+AKVA,AKVA.OL,AKVA Group ASA,Oslo,NOK
+APR,APR.OL,Appear ASA,Oslo,NOK
+ARCH,ARCH.OL,Archer Limited,Oslo,NOK
+AZT,AZT.OL,ArcticZymes Technologies ASA,Oslo,NOK
+AFK,AFK.OL,Arendals Fossekompani ASA,Oslo,NOK
+ARR,ARR.OL,Arribatec Group ASA,Oslo,NOK
+ATEA,ATEA.OL,Atea ASA,Oslo,NOK
+ASA,ASA.OL,Atlantic Sapphire ASA,Oslo,NOK
+AUSS,AUSS.OL,Austevoll Seafood ASA,Oslo,NOK
+AUTO,AUTO.OL,AutoStore Holdings Ltd.,Oslo,NOK
+ACR,ACR.OL,Axactor ASA,Oslo,NOK
+B2I,B2I.OL,B2 Impact ASA,Oslo,NOK
+BAKKA,BAKKA.OL,Bakkafrost P/f,Oslo,NOK
+BEWI,BEWI.OL,BEWi ASA,Oslo,NOK
+BINT,BINT.OL,BEWI Invest ASA,Oslo,NOK
+BIEN,BIEN.OL,Bien Sparebank ASA,Oslo,NOK
+BNOR,BNOR.OL,BlueNord ASA,Oslo,NOK
+BONHR,BONHR.OL,Bonheur ASA,Oslo,NOK
+BOR,BOR.OL,Borgestad ASA,Oslo,NOK
+BRG,BRG.OL,Borregaard ASA,Oslo,NOK
+BOUV,BOUV.OL,Bouvet ASA,Oslo,NOK
+BWLPG,BWLPG.OL,BW LPG Limited,Oslo,NOK
+BWE,BWE.OL,BW Energy Limited,Oslo,NOK
+BWO,BWO.OL,BW Offshore Limited,Oslo,NOK
+CADLR,CADLR.OL,Cadeler A/S,Oslo,NOK
+CAPSL,CAPSL.OL,Capsol Technologies ASA,Oslo,NOK
+CAVEN,CAVEN.OL,Cavendish Hydrogen ASA,Oslo,NOK
+CLOUD,CLOUD.OL,Cloudberry Clean Energy ASA,Oslo,NOK
+CMBTO,CMBTO.OL,CMB.TECH NV,Oslo,NOK
+CONTX,CONTX.OL,ContextVision AB,Oslo,NOK
+CRNA,CRNA.OL,Circio Holding ASA,Oslo,NOK
+DELIA,DELIA.OL,Dellia Group ASA,Oslo,NOK
+DNB,DNB.OL,DNB Bank ASA,Oslo,NOK
+DNO,DNO.OL,DNO ASA,Oslo,NOK
+DOFG,DOFG.OL,DOF Group ASA,Oslo,NOK
+EIOF,EIOF.OL,Eidesvik Offshore ASA,Oslo,NOK
+EMGS,EMGS.OL,Electromagnetic Geoservices ASA,Oslo,NOK
+ELK,ELK.OL,Elkem ASA,Oslo,NOK
+ELABS,ELABS.OL,Elliptic Laboratories ASA,Oslo,NOK
+ELO,ELO.OL,Elopak ASA,Oslo,NOK
+ENDUR,ENDUR.OL,Endúr ASA,Oslo,NOK
+ENSU,ENSU.OL,Ensurge Micropower ASA,Oslo,NOK
+ENTRA,ENTRA.OL,Entra ASA,Oslo,NOK
+ENVIP,ENVIP.OL,Envipco Holding N.V.,Oslo,NOK
+EPR,EPR.OL,Europris ASA,Oslo,NOK
+EQNR,EQNR.OL,Equinor ASA,Oslo,NOK
+EQVA,EQVA.OL,Eqva ASA,Oslo,NOK
+ELMRA,ELMRA.OL,Elmera Group ASA,Oslo,NOK
+DFENS,DFENS.OL,Fjord Defence Group ASA,Oslo,NOK
+FRO,FRO.OL,Frontline plc,Oslo,NOK
+GENO,GENO.OL,General Oceans ASA,Oslo,NOK
+GENT,GENT.OL,Gentian Diagnostics ASA,Oslo,NOK
+GJF,GJF.OL,Gjensidige Forsikring ASA,Oslo,NOK
+GOD,GOD.OL,Goodtech ASA,Oslo,NOK
+GSF,GSF.OL,Grieg Seafood ASA,Oslo,NOK
+GYL,GYL.OL,Gyldendal ASA,Oslo,NOK
+HAFNI,HAFNI.OL,Hafnia Limited,Oslo,NOK
+HAVI,HAVI.OL,Havila Shipping ASA,Oslo,NOK
+HERMA,HERMA.OL,Hermana Holding ASA,Oslo,NOK
+HEX,HEX.OL,Hexagon Composites ASA,Oslo,NOK
+HPUR,HPUR.OL,Hexagon Purus ASA,Oslo,NOK
+HSHP,HSHP.OL,Himalaya Shipping Ltd,Oslo,NOK
+HBC,HBC.OL,Hofseth BioCare ASA,Oslo,NOK
+HYPRO,HYPRO.OL,HydrogenPro ASA,Oslo,NOK
+HAUTO,HAUTO.OL,Höegh Autoliners ASA,Oslo,NOK
+IDEX,IDEX.OL,IDEX Biometrics ASA,Oslo,NOK
+IWS,IWS.OL,Integrated Wind Solutions ASA,Oslo,NOK
+IOX,IOX.OL,Interoil Exploration and Production ASA,Oslo,NOK
+ITERA,ITERA.OL,Itera ASA,Oslo,NOK
+JIN,JIN.OL,Jinhui Shipping and Transportation Limit,Oslo,NOK
+KID,KID.OL,KID ASA,Oslo,NOK
+KIT,KIT.OL,Kitron ASA,Oslo,NOK
+KCC,KCC.OL,Klaveness Combination Carriers ASA,Oslo,NOK
+KOMPL,KOMPL.OL,Komplett ASA,Oslo,NOK
+KOA,KOA.OL,Kongsberg Automotive ASA,Oslo,NOK
+KOG,KOG.OL,Kongsberg Gruppen ASA,Oslo,NOK
+KMAR,KMAR.OL,Kongsberg Maritime ASA,Oslo,NOK
+LSG,LSG.OL,Lerøy Seafood Group ASA,Oslo,NOK
+LIFE,LIFE.OL,Lifecare ASA,Oslo,NOK
+LINK,LINK.OL,Link Mobility Group Holding ASA,Oslo,NOK
+MGN,MGN.OL,Magnora ASA,Oslo,NOK
+MEDI,MEDI.OL,Medistim ASA,Oslo,NOK
+MORLD,MORLD.OL,Moreld ASA,Oslo,NOK
+MOWI,MOWI.OL,Mowi ASA,Oslo,NOK
+MPCC,MPCC.OL,MPC Container Ships ASA,Oslo,NOK
+MULTI,MULTI.OL,Multiconsult ASA,Oslo,NOK
+NAPA,NAPA.OL,Napatech A/S,Oslo,NOK
+NAVA,NAVA.OL,Navamedic ASA,Oslo,NOK
+NEL,NEL.OL,NEL ASA,Oslo,NOK
+NKR,NKR.OL,Nekkar ASA,Oslo,NOK
+NEXT,NEXT.OL,Next Biometrics Group ASA,Oslo,NOK
+NORBT,NORBT.OL,NORBIT ASA,Oslo,NOK
+NOM,NOM.OL,Nordic Mining ASA,Oslo,NOK
+NOD,NOD.OL,Nordic Semiconductor ASA,Oslo,NOK
+NORCO,NORCO.OL,Norconsult ASA,Oslo,NOK
+NHY,NHY.OL,Norsk Hydro ASA,Oslo,NOK
+NSKOG,NSKOG.OL,Norske Skog,Oslo,NOK
+NOL,NOL.OL,Northern Ocean Ltd.,Oslo,NOK
+NAS,NAS.OL,Norwegian Air Shuttle ASA,Oslo,NOK
+NRC,NRC.OL,NRC Group ASA,Oslo,NOK
+NYKD,NYKD.OL,Nykode Therapeutics ASA,Oslo,NOK
+ODL,ODL.OL,Odfjell Drilling Ltd,Oslo,NOK
+ODF,ODF.OL,Odfjell SE,Oslo,NOK
+OTL,OTL.OL,Odfjell Technology Ltd,Oslo,NOK
+OKEA,OKEA.OL,OKEA ASA,Oslo,NOK
+OET,OET.OL,Okeanis Eco Tankers Corp.,Oslo,NOK
+ONCIN,ONCIN.OL,Oncoinvent ASA,Oslo,NOK
+ORK,ORK.OL,Orkla ASA,Oslo,NOK
+OTEC,OTEC.OL,Otello Corporation ASA,Oslo,NOK
+OTOVO,OTOVO.OL,Otovo ASA,Oslo,NOK
+PEN,PEN.OL,Panoro Energy ASA,Oslo,NOK
+PLSV,PLSV.OL,Paratus Energy Services Ltd.,Oslo,NOK
+PARB,PARB.OL,Pareto Bank ASA,Oslo,NOK
+PNOR,PNOR.OL,PetroNor E&P ASA,Oslo,NOK
+PSE,PSE.OL,Petrolia SE,Oslo,NOK
+PEXIP,PEXIP.OL,Pexip Holding ASA,Oslo,NOK
+PHO,PHO.OL,Photocure ASA,Oslo,NOK
+POL,POL.OL,Polaris Media ASA,Oslo,NOK
+PLT,PLT.OL,poLight ASA,Oslo,NOK
+PRS,PRS.OL,Prosafe SE,Oslo,NOK
+PROT,PROT.OL,Protector Forsikring ASA,Oslo,NOK
+PUBLI,PUBLI.OL,Public Property Invest ASA,Oslo,NOK
+QEC,QEC.OL,Questerre Energy Corporation,Oslo,NOK
+REACH,REACH.OL,Reach Subsea ASA,Oslo,NOK
+RECSI,RECSI.OL,REC Silicon ASA,Oslo,NOK
+SDSD,SDSD.OL,S.D. Standard ETC Plc,Oslo,NOK
+SAGA,SAGA.OL,Saga Pure ASA,Oslo,NOK
+SALM,SALM.OL,SalMar ASA,Oslo,NOK
+SALME,SALME.OL,Salmon Evolution ASA,Oslo,NOK
+SATS,SATS.OL,SATS ASA,Oslo,NOK
+SCANA,SCANA.OL,Scana ASA,Oslo,NOK
+SCATC,SCATC.OL,Scatec ASA,Oslo,NOK
+ENH,ENH.OL,SED Energy Holdings Plc,Oslo,NOK
+SNTIA,SNTIA.OL,Sentia ASA,Oslo,NOK
+SBO,SBO.OL,Selvaag Bolig ASA,Oslo,NOK
+SMOP,SMOP.OL,Smartoptics Group ASA,Oslo,NOK
+SWON,SWON.OL,SoftwareOne Holding AG,Oslo,NOK
+STECH,STECH.OL,Soiltech ASA,Oslo,NOK
+SOMA,SOMA.OL,Solstad Maritime ASA,Oslo,NOK
+SOFF,SOFF.OL,Solstad Offshore ASA,Oslo,NOK
+SB1NO,SB1NO.OL,SpareBank 1 Sør-Norge ASA,Oslo,NOK
+SNI,SNI.OL,Stolt-Nielsen Limited,Oslo,NOK
+STB,STB.OL,Storebrand ASA,Oslo,NOK
+STRO,STRO.OL,StrongPoint ASA,Oslo,NOK
+SUBC,SUBC.OL,Subsea 7 SA,Oslo,NOK
+TECH,TECH.OL,Techstep ASA,Oslo,NOK
+TEKNA,TEKNA.OL,Tekna Holding ASA,Oslo,NOK
+TEL,TEL.OL,Telenor ASA,Oslo,NOK
+TGS,TGS.OL,TGS ASA,Oslo,NOK
+TRMED,TRMED.OL,Thor Medical ASA,Oslo,NOK
+TIETO,TIETO.OL,TietoEVRY Oyj,Oslo,NOK
+TOM,TOM.OL,Tomra Systems ASA,Oslo,NOK
+VEI,VEI.OL,Veidekke ASA,Oslo,NOK
+VEND,VEND.OL,Vend Marketplaces ASA,Oslo,NOK
+VISTN,VISTN.OL,Vistin Pharma ASA,Oslo,NOK
+VOW,VOW.OL,Vow ASA,Oslo,NOK
+VVL,VVL.OL,Voss Veksel- og Landmandsbank ASA,Oslo,NOK
+VAR,VAR.OL,Vår Energi ASA,Oslo,NOK
+WSTEP,WSTEP.OL,Webstep ASA,Oslo,NOK
+WAWI,WAWI.OL,Wallenius Wilhelmsen ASA,Oslo,NOK
+WWI,WWI.OL,Wilh. Wilhelmsen Holding ASA,Oslo,NOK
+YAR,YAR.OL,Yara International ASA,Oslo,NOK
+ZAL,ZAL.OL,Zalaris ASA,Oslo,NOK
+ZAP,ZAP.OL,Zaptec ASA,Oslo,NOK
+ZLNA,ZLNA.OL,Zelluna ASA,Oslo,NOK
