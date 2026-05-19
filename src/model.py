@@ -18,31 +18,39 @@ TOP_N = 5
 MIN_HISTORY_DAYS = 504
 MIN_PRICE = 1.0
 LIQUIDITY_LOOKBACK_DAYS = 60
-MIN_TURNOVER_60D_MEDIAN = 1_000_000
+MIN_TURNOVER_60D_MEDIAN = 2_000_000
 PERIODS_PER_YEAR = 252 / REBALANCE_EVERY_DAYS
 TARGET_COL = "fwd_ret_20d"
 LABEL_DATE_COL = "label_date_20d"
 
 
-def build_dataset() -> pd.DataFrame:
+def build_dataset(prices: pd.DataFrame | None = None, min_turnover_60d_median: float | None = MIN_TURNOVER_60D_MEDIAN) -> pd.DataFrame:
     """Load raw prices, build features, drop rows where any feature is missing."""
-    prices = load_all_prices()
+    if prices is None:
+        prices = load_all_prices()
     feats = add_features(prices)
-    feats = filter_liquid_rows(feats)
-    feats = rerank_features(feats)
+    if min_turnover_60d_median is not None:
+        feats = filter_liquid_rows(feats, min_turnover_60d_median=min_turnover_60d_median)
+        feats = rerank_features(feats)
     return feats.dropna(subset=FEATURE_COLS).reset_index(drop=True)
 
 
-def filter_liquid_rows(df: pd.DataFrame) -> pd.DataFrame:
+def filter_liquid_rows(
+    df: pd.DataFrame,
+    min_turnover_60d_median: float = MIN_TURNOVER_60D_MEDIAN,
+    min_history_days: int = MIN_HISTORY_DAYS,
+    min_price: float = MIN_PRICE,
+    liquidity_lookback_days: int = LIQUIDITY_LOOKBACK_DAYS,
+) -> pd.DataFrame:
     """Keep rows where the stock is seasoned and liquid enough to trade."""
     out = df.sort_values(["ticker", "date"]).copy()
     turnover = out["close"] * out["volume"]
-    out["turnover_60d_median"] = turnover.groupby(out["ticker"]).transform(lambda s: s.rolling(LIQUIDITY_LOOKBACK_DAYS).median())
+    out["turnover_60d_median"] = turnover.groupby(out["ticker"]).transform(lambda s: s.rolling(liquidity_lookback_days).median())
     out["history_days"] = out.groupby("ticker").cumcount() + 1
     mask = (
-        (out["history_days"] >= MIN_HISTORY_DAYS)
-        & (out["adj_close"] >= MIN_PRICE)
-        & (out["turnover_60d_median"] >= MIN_TURNOVER_60D_MEDIAN)
+        (out["history_days"] >= min_history_days)
+        & (out["adj_close"] >= min_price)
+        & (out["turnover_60d_median"] >= min_turnover_60d_median)
     )
     return out[mask].copy()
 

@@ -1,3 +1,4 @@
+from collections import Counter
 import time
 
 import pandas as pd
@@ -135,6 +136,20 @@ def print_backtest_summary(bt) -> None:
     print_metric_table(rows)
 
 
+def print_backtest_pick_frequency(bt, top: int = 15) -> None:
+    """Show whether the backtest depends on just a few repeated names."""
+    print_section("Most Frequent Backtest Picks")
+    if bt.empty or "picks" not in bt:
+        print("No backtest picks.")
+        return
+
+    counts = Counter()
+    for picks in bt["picks"]:
+        counts.update(str(picks).split(", "))
+    rows = [(ticker, f"{count}", format_pct(count / len(bt), digits=1)) for ticker, count in counts.most_common(top)]
+    print_table(["Ticker", "Selections", "Periods"], rows, align={"Ticker": "l", "Selections": "r", "Periods": "r"})
+
+
 def print_latest_picks(last_date, picks) -> None:
     rows = [(row["ticker"], format_pct(row["pred"]), f"{row['adj_close']:.2f}") for _, row in picks.iterrows()]
     print_section(f"Top {TOP_N} BUY Picks On {last_date.date()}")
@@ -186,6 +201,7 @@ def main() -> None:
     bt = backtest_top_n(test)
     progress.done("Running backtest")
     print_backtest_summary(bt)
+    print_backtest_pick_frequency(bt)
 
     sweep = holding_period_sweep(test)
     print()
