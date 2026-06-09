@@ -1,0 +1,31 @@
+ticker,yahoo_symbol,name,market,currency
+DNB,DNB.OL,DNB Bank ASA,Oslo,NOK
+STB,STB.OL,Storebrand ASA,Oslo,NOK
+EQNR,EQNR.OL,Equinor ASA,Oslo,NOK
+SALM,SALM.OL,SalMar ASA,Oslo,NOK
+ESSITY_B,ESSITY-B.ST,Essity AB Class B,Stockholm,SEK
+KMAR,KMAR.OL,Kongsberg Maritime ASA,Oslo,NOK
+KOG,KOG.OL,Kongsberg Gruppen ASA,Oslo,NOK
+VALMT,VALMT.HE,Valmet Oyj,Helsinki,EUR
+PROT,PROT.OL,Protector Forsikring ASA,Oslo,NOK
+SB1NO,SB1NO.OL,SpareBank 1 Sør-Norge ASA,Oslo,NOK
+VEND,VEND.OL,Vend Marketplaces ASA,Oslo,NOK
+ATEA,ATEA.OL,Atea ASA,Oslo,NOK
+KIT,KIT.OL,Kitron ASA,Oslo,NOK
+BRAV,BRAV.ST,Bravida Holding AB,Stockholm,SEK
+MOWI,MOWI.OL,Mowi ASA,Oslo,NOK
+ORK,ORK.OL,Orkla ASA,Oslo,NOK
+YAR,YAR.OL,Yara International ASA,Oslo,NOK
+AKER,AKER.OL,Aker ASA Class A,Oslo,NOK
+WWI,WWI.OL,Wilh. Wilhelmsen Holding ASA Class A,Oslo,NOK
+SATS,SATS.OL,SATS ASA,Oslo,NOK
+AFRY_B,AFRY.ST,Afry AB Class B,Stockholm,SEK
+BRG,BRG.OL,Borregaard ASA,Oslo,NOK
+NOD,NOD.OL,Nordic Semiconductor ASA,Oslo,NOK
+VAR,VAR.OL,Var Energi ASA,Oslo,NOK
+TOM,TOM.OL,Tomra Systems ASA,Oslo,NOK
+NORBT,NORBT.OL,NORBIT ASA,Oslo,NOK
+ABG,ABG.OL,ABG Sundal Collier Holding ASA,Oslo,NOK
+EPR,EPR.OL,Europris ASA,Oslo,NOK
+ABL,ABL.OL,ABL Group ASA,Oslo,NOK
+WSTEP,WSTEP.OL,Webstep ASA,Oslo,NOK
