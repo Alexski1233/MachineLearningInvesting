@@ -234,8 +234,13 @@ __marimo__/
 
 # Generated outputs
 /output/
+/mlinvestingv2/output/
 /.mplconfig/
 /.cache/
+
+# Local v2 market data and macOS metadata
+/mlinvestingv2/data/
+.DS_Store
 
 # Local experiment scripts; kept private by default
 /fetch_yahoo_prices.py
