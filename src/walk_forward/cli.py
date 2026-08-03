@@ -1,8 +1,8 @@
-from __future__ import annotations
-
 import argparse
 from pathlib import Path
 from typing import Sequence
+
+from prettytable import PrettyTable
 
 from .backtest import expected_return_hurdle
 from .config import BacktestConfig, FeatureConfig, ModelConfig
@@ -12,7 +12,7 @@ from .pipeline import latest_predictions, run_research
 
 
 def main(argv: Sequence[str] | None = None) -> int:
-    """Run a research backtest or generate a freshly refitted signal snapshot."""
+    """Run a backtest or generate the latest signals."""
     parser = _parser()
     args = parser.parse_args(argv)
     prices, dropped = drop_invalid_price_rows(load_price_directory(args.prices_dir))
@@ -24,16 +24,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     model_config = ModelConfig()
 
     if args.command == "latest":
-        signal_date, predictions, diagnostics = latest_predictions(
-            prices,
-            feature_config,
-            model_config,
-            membership,
-        )
+        signal_date, predictions, diagnostics = latest_predictions(prices, feature_config, model_config, membership)
         screen_config = _backtest_config(args)
-        predictions["entry_threshold"] = predictions["horizon_sessions"].map(
-            lambda horizon: expected_return_hurdle(int(horizon), screen_config)
-        )
+        predictions["entry_threshold"] = predictions["horizon_sessions"].map(lambda horizon: expected_return_hurdle(int(horizon), screen_config))
         predictions["trade_eligible"] = predictions["expected_return"] > predictions["entry_threshold"]
         candidates = predictions[predictions["trade_eligible"]]
         print(f"Latest after-close signal date: {signal_date.date()}")
@@ -48,7 +41,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         if candidates.empty:
             print("No candidate clears the risk-free and trading-cost hurdle.")
         else:
-            print(candidates[display_columns].head(args.top_n).to_string(index=False))
+            _print_frame(candidates.head(args.top_n), display_columns)
         if args.output_dir:
             output = _output_directory(args.output_dir)
             predictions.to_csv(output / "latest_predictions.csv", index=False)
@@ -56,15 +49,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 0
 
     backtest_config = _backtest_config(args)
-    result = run_research(
-        prices,
-        args.start,
-        feature_config,
-        model_config,
-        backtest_config,
-        membership,
-    )
-    print(result.metric_comparison().to_string(float_format=lambda value: f"{value:.4f}"))
+    result = run_research(prices, args.start, feature_config, model_config, backtest_config, membership)
+    comparison = result.metric_comparison()
+    _print_frame(comparison.reset_index(), ["strategy", *comparison.columns])
     if not result.survivorship_safe:
         print("WARNING: no point-in-time universe was supplied; survivorship safety is not established.")
     if args.output_dir:
@@ -75,12 +62,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         result.strategy.trades.to_csv(output / "strategy_trades.csv", index=False)
         result.strategy.holdings.to_csv(output / "strategy_holdings.csv", index=False)
         result.strategy.selections.to_csv(output / "strategy_selections.csv", index=False)
-        result.momentum_baseline.daily_equity.to_csv(
-            output / "momentum_daily_equity.csv",
-            index=False,
-        )
+        result.momentum_baseline.daily_equity.to_csv(output / "momentum_daily_equity.csv", index=False)
         result.momentum_baseline.trades.to_csv(output / "momentum_trades.csv", index=False)
-        result.metric_comparison().to_csv(output / "metric_comparison.csv")
+        comparison.to_csv(output / "metric_comparison.csv")
     return 0
 
 
@@ -129,6 +113,13 @@ def _output_directory(path: str | Path) -> Path:
     output = Path(path)
     output.mkdir(parents=True, exist_ok=True)
     return output
+
+
+def _print_frame(frame, columns: list[str]) -> None:
+    table = PrettyTable()
+    table.field_names = columns
+    table.add_rows(list(frame[columns].itertuples(index=False, name=None)))
+    print(table)
 
 
 if __name__ == "__main__":

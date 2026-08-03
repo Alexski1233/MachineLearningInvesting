@@ -1,67 +1,91 @@
 # Machine Learning Investing
 
-Research code for testing a machine learning stock picker on Nordic equity data.
-The script trains on local price files, evaluates on unseen data, backtests a simple top 5 rule, and prints the latest paper trading candidates.
+This repository contains two stock selection methods for Nordic equities. The holdout strategy uses one fixed test period. The walk forward strategy refits through time and models trading costs and next open execution.
 
-## Install
+## Setup
 
-Create the conda environment once.
+Create the conda environment and install the local package.
 
 ```bash
 conda env create -f environment.yml
-```
-
-Activate it.
-
-```bash
 conda activate mlinvest
+python -m pip install -e ".[dev]"
 ```
 
-Update an existing environment after dependency changes.
+Use this command to update an existing environment.
 
 ```bash
 conda env update -f environment.yml --prune
 ```
 
-## Run
+## Price data
 
-```bash
-python src/main.py
-```
-
-Input price files live in `data/raw_prices/`. Each CSV should have at least `ticker`, `date`, `adj_close`, and `volume`.
-
-To refresh the Nordic Yahoo Finance price files, run this before the model.
+Price files belong in `data/raw_prices`. Refresh the Yahoo Finance files when needed.
 
 ```bash
 python src/fetch_prices.py
 ```
 
-## What It Does
+Each CSV needs `ticker`, `date`, `adj_close`, and `volume`. The walk forward strategy also needs `open` and `close`. It accepts `high`, `low`, `exchange`, `in_universe`, and `delisting_return` when those fields are available.
 
-The pipeline loads all price CSVs, builds price based features, trains several candidate models, and selects the best model on validation data.
-The 2020 onward period is kept for unseen testing.
+A walk forward run must contain one exchange calendar. Prices, volume, and portfolio capital must also use a consistent currency.
 
-Features include momentum, volatility, trend, drawdown, liquidity, and same day cross sectional ranks. The label is the next 20 trading day return for the same stock.
+## Holdout strategy
 
-The candidate models are ridge regression, random forest, extra trees, histogram gradient boosting, and Huber loss gradient boosting.
-This model set follows common empirical asset pricing practice.
-Gu, Kelly, and Xiu compare similar machine learning models in [The Review of Financial Studies](https://academic.oup.com/rfs/article/33/5/2223/5758276).
+```bash
+python src/run_holdout.py
+```
 
-## Output
+The holdout strategy trains and selects models on data before 2020. It evaluates the selected model from 2020 onward. Its features cover momentum, volatility, trend, drawdown, and liquidity. The prediction target is the next 20 trading day return.
 
-The script prints progress while it loads data and trains models.
+The backtest buys the five highest ranked stocks every 20 trading days and compares the result with an equal weighted universe. It does not model transaction costs, next open execution, or historical index membership.
 
-`Data` shows the number of rows, number of tickers, date range, and whether the latest local price file is fresh.
+Limit the run to a CSV universe when required. The file must contain a `ticker` column.
 
-`Model Selection` shows validation results from the pre 2020 period. The selected model is trained again on all eligible pre 2020 data.
+```bash
+python src/run_holdout.py --universe data/universe_fondsfinans.csv
+```
 
-`Unseen Test Accuracy` reports accuracy from 2020 onward.
-Direction accuracy measures whether the model got the return sign right.
-Top 5 hit rate measures how often selected stocks had positive forward returns.
-Rank IC measures whether the model ranked better stocks higher.
-OOS R squared tests exact return prediction against the training mean.
+## Walk forward strategy
 
-`Backtest` simulates buying the top 5 names every 20 trading days. It compares the strategy with an equal weighted universe benchmark.
+```bash
+python src/run_walk_forward.py
+```
 
-`Top 5 BUY Picks` is the latest ranked list for paper trading. Treat `Pred 20d` as a ranking score, not a precise return forecast.
+Signals are calculated after the close and executed at the next adjusted open. Each refit can only use outcomes known before its signal date. Candidate models are selected with historical cross sectional rank IC.
+
+The preset combines 25 percent machine learning with 75 percent 12 minus 1 momentum. It holds at most five stocks. Position sizing uses inverse volatility, a maximum weight, a ranking buffer, and a no trade band.
+
+The backtest accounts for commission, spread, market impact, volume capacity, cash, stale prices, and delisting returns when the required data are present. Results are written to `output/walk_forward`.
+
+## Configurable walk forward runs
+
+Use the command line interface to change the start date, portfolio size, capital, costs, or output location.
+
+```bash
+walk-forward research --prices-dir data/raw_prices --start 2020-01-02 --capital 1000000 --top-n 10 --output-dir output/walk_forward
+```
+
+Generate a candidate list for the latest eligible date.
+
+```bash
+walk-forward latest --prices-dir data/raw_prices --top-n 10 --output-dir output/walk_forward
+```
+
+The optional `--universe` argument accepts a historical membership file with this structure.
+
+```text
+ticker,listed_from,listed_to
+AAA,2004-05-01,2021-09-30
+BBB,2010-03-15,
+```
+
+Without historical membership data, a result may contain survivorship bias. The price data must also include delisted companies and their payouts. A membership file cannot restore missing price histories.
+
+## Tests
+
+```bash
+python -m pytest -q
+```
+
+Backtest results are research estimates. A test period becomes development data if the method is changed after its results have been reviewed.

@@ -17,11 +17,7 @@ class FeatureConfig:
     def __post_init__(self) -> None:
         _require_integer("holding_days", self.holding_days, minimum=1)
         _require_integer("min_history_days", self.min_history_days, minimum=1)
-        _require_integer(
-            "liquidity_lookback_days",
-            self.liquidity_lookback_days,
-            minimum=2,
-        )
+        _require_integer("liquidity_lookback_days", self.liquidity_lookback_days, minimum=2)
         if not isfinite(self.min_price) or self.min_price <= 0:
             raise ValueError("min_price must be finite and positive.")
         if not isfinite(self.min_median_dollar_volume) or self.min_median_dollar_volume < 0:
@@ -58,11 +54,7 @@ class ModelConfig:
         if not isfinite(self.minimum_validation_rank_ic) or self.minimum_validation_rank_ic < 0:
             raise ValueError("minimum_validation_rank_ic must be finite and non-negative.")
         _require_integer("calibration_buckets", self.calibration_buckets, minimum=2)
-        _require_integer(
-            "calibration_shrinkage_dates",
-            self.calibration_shrinkage_dates,
-            minimum=0,
-        )
+        _require_integer("calibration_shrinkage_dates", self.calibration_shrinkage_dates, minimum=0)
         _require_integer("random_state", self.random_state, minimum=0)
 
 

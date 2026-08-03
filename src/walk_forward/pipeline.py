@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from dataclasses import dataclass
 from typing import Iterable
 
@@ -15,34 +13,24 @@ from .model import fit_latest_and_predict, walk_forward_predict
 
 @dataclass(frozen=True)
 class ResearchResult:
-    """Artifacts from one pre-specified walk-forward research run."""
-
     panel: pd.DataFrame
     predictions: pd.DataFrame
     momentum_predictions: pd.DataFrame
     model_diagnostics: pd.DataFrame
     strategy: BacktestResult
     momentum_baseline: BacktestResult
-    signal_dates: tuple[pd.Timestamp, ...]
     survivorship_safe: bool
 
     def metric_comparison(self) -> pd.DataFrame:
-        """Compare ML and a simple momentum rule under identical costs."""
-        rows = []
-        for name, result in (
+        results = (
             ("walk_forward_ml", self.strategy),
             ("momentum_12_1", self.momentum_baseline),
-        ):
-            row = {"strategy": name, **result.metrics.as_dict()}
-            rows.append(row)
+        )
+        rows = [{"strategy": name, **result.metrics.as_dict()} for name, result in results]
         return pd.DataFrame(rows).set_index("strategy")
 
 
-def make_signal_dates(
-    prices: pd.DataFrame,
-    start_date: object,
-    every_n_sessions: int,
-) -> tuple[pd.Timestamp, ...]:
+def make_signal_dates(prices: pd.DataFrame, start_date: object, every_n_sessions: int) -> tuple[pd.Timestamp, ...]:
     """Create one fixed rebalance phase from a market-session calendar."""
     if every_n_sessions < 1:
         raise ValueError("every_n_sessions must be positive.")
@@ -95,7 +83,6 @@ def run_research(
         model_diagnostics=diagnostics,
         strategy=strategy,
         momentum_baseline=momentum_baseline,
-        signal_dates=signal_dates,
         survivorship_safe=had_membership,
     )
 
@@ -169,10 +156,7 @@ def latest_predictions(
         raise ValueError("No date has a complete, investable feature cross-section.")
     signal_date = pd.Timestamp(eligible_dates.max())
     predictions, diagnostics = fit_latest_and_predict(panel, signal_date, models)
-    predictions = predictions.sort_values(
-        ["score", "expected_return"],
-        ascending=False,
-    ).reset_index(drop=True)
+    predictions = predictions.sort_values(["score", "expected_return"], ascending=False).reset_index(drop=True)
     return signal_date, predictions, diagnostics
 
 
@@ -202,10 +186,7 @@ def _momentum_signals(
         if history["date"].nunique() < minimum_calibration_dates:
             continue
 
-        history["_bucket"] = _rank_bucket(
-            history["momentum_12_1_xrank"],
-            bucket_count,
-        )
+        history["_bucket"] = _rank_bucket(history["momentum_12_1_xrank"], bucket_count)
         by_date_bucket = history.groupby(["date", "_bucket"])[TARGET_COLUMN].mean()
         bucket_statistics = by_date_bucket.groupby("_bucket").agg(["mean", "count"])
         global_return = float(history.groupby("date")[TARGET_COLUMN].mean().mean())
@@ -271,10 +252,3 @@ def _require_single_exchange_calendar(prices: pd.DataFrame) -> None:
             "run each exchange separately so next-open execution stays exact."
         )
 
-
-__all__ = [
-    "ResearchResult",
-    "latest_predictions",
-    "make_signal_dates",
-    "run_research",
-]

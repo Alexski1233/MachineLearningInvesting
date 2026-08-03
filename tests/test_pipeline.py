@@ -1,10 +1,8 @@
-from __future__ import annotations
-
 import pandas as pd
 import pytest
 
-from mlinvesting.features import LABEL_DATE_COLUMN, TARGET_COLUMN
-from mlinvesting.pipeline import _momentum_signals, blend_ranked_signals, make_signal_dates, run_research
+from walk_forward.features import LABEL_DATE_COLUMN, TARGET_COLUMN
+from walk_forward.pipeline import _momentum_signals, blend_ranked_signals, make_signal_dates, run_research
 
 
 def test_signal_dates_use_one_fixed_session_phase() -> None:

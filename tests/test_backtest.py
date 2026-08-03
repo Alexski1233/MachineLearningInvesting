@@ -1,11 +1,9 @@
-from __future__ import annotations
-
 import numpy as np
 import pandas as pd
 import pytest
 
-from mlinvesting.backtest import run_backtest
-from mlinvesting.config import BacktestConfig
+from walk_forward.backtest import run_backtest
+from walk_forward.config import BacktestConfig
 
 
 def _prices(rows: list[tuple]) -> pd.DataFrame:

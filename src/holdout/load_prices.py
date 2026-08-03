@@ -1,7 +1,7 @@
 from pathlib import Path
 import pandas as pd
 
-RAW_PRICES = Path(__file__).resolve().parents[1] / "data" / "raw_prices"
+RAW_PRICES = Path(__file__).resolve().parents[2] / "data" / "raw_prices"
 
 
 def load_all_prices() -> pd.DataFrame:
@@ -13,17 +13,3 @@ def load_all_prices() -> pd.DataFrame:
     frames = [pd.read_csv(csv, parse_dates=["date"], dtype={"ticker": str, "yahoo_symbol": str}) for csv in sorted(RAW_PRICES.glob("*.csv"))]
     out = pd.concat(frames, ignore_index=True)
     return out.sort_values(["ticker", "date"]).reset_index(drop=True)
-
-
-def summarize(df: pd.DataFrame) -> None:
-    """Print a one-glance summary: row count, ticker count, date range."""
-    print(f"Rows:        {len(df):,}")
-    print(f"Tickers:     {df['ticker'].nunique()}")
-    print(f"Date range:  {df['date'].min().date()} -> {df['date'].max().date()}")
-
-
-if __name__ == "__main__":
-    df = load_all_prices()
-    print(df.head())
-    print()
-    summarize(df)

@@ -1,18 +1,10 @@
-from __future__ import annotations
-
 import numpy as np
 import pandas as pd
 import pytest
 
-from mlinvesting.config import FeatureConfig
-from mlinvesting.data import attach_universe_membership, drop_invalid_price_rows, validate_prices
-from mlinvesting.features import (
-    LABEL_DATE_COLUMN,
-    MARKET_FEATURE_COLUMNS,
-    RAW_RETURN_COLUMN,
-    TARGET_COLUMN,
-    build_feature_panel,
-)
+from walk_forward.config import FeatureConfig
+from walk_forward.data import attach_universe_membership, drop_invalid_price_rows, validate_prices
+from walk_forward.features import LABEL_DATE_COLUMN, MARKET_FEATURE_COLUMNS, RAW_RETURN_COLUMN, TARGET_COLUMN, build_feature_panel
 
 
 def _prices(days: int = 90, tickers: tuple[str, ...] = ("A", "B", "C")) -> pd.DataFrame:

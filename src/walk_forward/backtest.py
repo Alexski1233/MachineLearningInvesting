@@ -1,10 +1,6 @@
-"""Point-in-time portfolio backtesting with explicit execution and costs."""
-
-from __future__ import annotations
-
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from math import sqrt
-from typing import Final, cast
+from typing import cast
 
 import numpy as np
 import pandas as pd
@@ -12,13 +8,13 @@ import pandas as pd
 from .config import BacktestConfig
 
 
-TRADING_DAYS_PER_YEAR: Final[int] = 252
-_EPS: Final[float] = 1e-10
+TRADING_DAYS_PER_YEAR = 252
+_EPS = 1e-10
 
 
 @dataclass(frozen=True)
 class BacktestMetrics:
-    """Headline net performance, risk, turnover, and cost statistics."""
+    """Backtest summary statistics."""
 
     net_total_return: float
     net_cagr: float
@@ -32,40 +28,18 @@ class BacktestMetrics:
     trading_days: int
 
     def as_dict(self) -> dict[str, float | int]:
-        """Return metrics in a serialization-friendly representation."""
-        return {
-            "net_total_return": self.net_total_return,
-            "net_cagr": self.net_cagr,
-            "daily_excess_sharpe": self.daily_excess_sharpe,
-            "max_drawdown": self.max_drawdown,
-            "turnover": self.turnover,
-            "annualized_turnover": self.annualized_turnover,
-            "total_costs": self.total_costs,
-            "total_cost_rate": self.total_cost_rate,
-            "ending_equity": self.ending_equity,
-            "trading_days": self.trading_days,
-        }
+        return asdict(self)
 
 
 @dataclass(frozen=True)
 class BacktestResult:
-    """Complete auditable result of :func:`run_backtest`."""
+    """Tables and metrics from a backtest."""
 
     daily_equity: pd.DataFrame
     trades: pd.DataFrame
     holdings: pd.DataFrame
     selections: pd.DataFrame
     metrics: BacktestMetrics
-
-    @property
-    def equity(self) -> pd.DataFrame:
-        """Backward-friendly alias for ``daily_equity``."""
-        return self.daily_equity
-
-    @property
-    def signal_selections(self) -> pd.DataFrame:
-        """Descriptive alias for ``selections``."""
-        return self.selections
 
 
 @dataclass
@@ -144,25 +118,8 @@ _SELECTION_COLUMNS = [
 ]
 
 
-def run_backtest(
-    prices: pd.DataFrame,
-    signals: pd.DataFrame,
-    config: BacktestConfig,
-) -> BacktestResult:
-    """Run a net, long-only backtest without using future returns.
-
-    A signal stamped on date ``t`` is treated as known after that close and is
-    executed only at adjusted open on the first market date strictly after
-    ``t``. Required signal columns are ``date``, ``ticker``, and one of
-    ``score``, ``expected_return``, ``horizon_sessions``, and
-    ``model_refit_date``. The score is used only for ranking; expected return
-    must be an absolute return forecast in holding-period units.
-    Signal volatility and trailing median dollar volume may be supplied; when
-    absent, they are derived solely from prices available through the signal
-    close. Price data require ``date``, ``ticker``, volume, adjusted close, and
-    adjusted open (or open/close plus adjusted close, from which adjusted open
-    is derived).
-    """
+def run_backtest(prices: pd.DataFrame, signals: pd.DataFrame, config: BacktestConfig) -> BacktestResult:
+    """Run a long only backtest with next open execution and trading costs."""
     px = _prepare_prices(prices)
     sig = _prepare_signals(signals, px)
     if px.empty or sig.empty:
@@ -195,10 +152,7 @@ def run_backtest(
     return engine.run(simulation_dates, schedule)
 
 
-def expected_return_hurdle(
-    horizon_sessions: int,
-    config: BacktestConfig,
-) -> float:
+def expected_return_hurdle(horizon_sessions: int, config: BacktestConfig) -> float:
     """Return the minimum absolute forecast needed for a new position."""
     if (
         isinstance(horizon_sessions, bool)
@@ -232,11 +186,7 @@ class _Engine:
         self.holding_rows: list[dict[str, object]] = []
         self.daily_rows: list[dict[str, object]] = []
 
-    def run(
-        self,
-        dates: pd.DatetimeIndex,
-        schedule: dict[pd.Timestamp, pd.Timestamp],
-    ) -> BacktestResult:
+    def run(self, dates: pd.DatetimeIndex, schedule: dict[pd.Timestamp, pd.Timestamp]) -> BacktestResult:
         daily_rf = (1 + self.config.annual_risk_free_rate) ** (1 / TRADING_DAYS_PER_YEAR) - 1
         previous_equity = float(self.config.initial_capital)
         for date in dates:
@@ -327,9 +277,7 @@ class _Engine:
             for ticker, position in self.positions.items()
             if np.isfinite(self._execution_price(execution_date, ticker))
         }
-        pretrade_equity = self.cash + sum(
-            open_values.get(ticker, position.units * position.last_mark) for ticker, position in self.positions.items()
-        )
+        pretrade_equity = self.cash + sum(open_values.get(ticker, position.units * position.last_mark) for ticker, position in self.positions.items())
 
         for _, row in snapshot.iterrows():
             ticker = str(row["ticker"])
@@ -494,14 +442,7 @@ class _Engine:
             )
         return recovery_loss
 
-    def _forced_exit(
-        self,
-        date: pd.Timestamp,
-        ticker: str,
-        position: _Position,
-        proceeds: float,
-        side: str,
-    ) -> None:
+    def _forced_exit(self, date: pd.Timestamp, ticker: str, position: _Position, proceeds: float, side: str) -> None:
         price = proceeds / position.units if position.units > 0 else 0.0
         self.trade_rows.append(
             {
@@ -590,10 +531,7 @@ def _prepare_prices(prices: pd.DataFrame) -> pd.DataFrame:
     out.loc[out["_adj_open"] <= 0, "_adj_open"] = np.nan
     out.loc[out["_adj_close"] <= 0, "_adj_close"] = np.nan
 
-    liquidity_col = _first_column(
-        out,
-        ["median_dollar_volume", "trailing_median_dollar_volume", "turnover_60d_median", "dollar_volume_60d_median"],
-    )
+    liquidity_col = _first_column(out, ["median_dollar_volume", "trailing_median_dollar_volume", "turnover_60d_median", "dollar_volume_60d_median"])
     if liquidity_col is not None:
         out["_median_dollar_volume"] = pd.to_numeric(out[liquidity_col], errors="coerce")
     else:
@@ -602,9 +540,7 @@ def _prepare_prices(prices: pd.DataFrame) -> pd.DataFrame:
         volume = pd.to_numeric(out["volume"], errors="coerce")
         raw_price = pd.to_numeric(out["close"], errors="coerce") if "close" in out.columns else out["_adj_close"]
         dollar_volume = raw_price * volume
-        out["_median_dollar_volume"] = dollar_volume.groupby(out["ticker"]).transform(
-            lambda series: series.rolling(60, min_periods=1).median()
-        )
+        out["_median_dollar_volume"] = dollar_volume.groupby(out["ticker"]).transform(lambda series: series.rolling(60, min_periods=1).median())
     if "delisting_return" not in out:
         out["delisting_return"] = np.nan
     raw_delisting = out["delisting_return"]
@@ -616,9 +552,7 @@ def _prepare_prices(prices: pd.DataFrame) -> pd.DataFrame:
     if invalid_delisting.any():
         raise ValueError("delisting_return must be finite and no smaller than -1.")
     returns = out.groupby("ticker")["_adj_close"].pct_change(fill_method=None)
-    out["_derived_volatility"] = returns.groupby(out["ticker"]).transform(
-        lambda series: series.rolling(20, min_periods=2).std()
-    )
+    out["_derived_volatility"] = returns.groupby(out["ticker"]).transform(lambda series: series.rolling(20, min_periods=2).std())
     return out
 
 
@@ -650,10 +584,7 @@ def _prepare_signals(signals: pd.DataFrame, prices: pd.DataFrame) -> pd.DataFram
     if (out["model_refit_date"] > out["date"]).any():
         raise ValueError("model_refit_date cannot be later than the signal date.")
     volatility_col = _first_column(out, ["volatility", "vol_20d", "vol_60d", "realized_volatility"])
-    liquidity_col = _first_column(
-        out,
-        ["median_dollar_volume", "trailing_median_dollar_volume", "turnover_60d_median", "dollar_volume_60d_median"],
-    )
+    liquidity_col = _first_column(out, ["median_dollar_volume", "trailing_median_dollar_volume", "turnover_60d_median", "dollar_volume_60d_median"])
     if volatility_col is not None:
         out["_volatility"] = pd.to_numeric(out[volatility_col], errors="coerce")
     else:
@@ -772,10 +703,3 @@ def _normalise_tickers(values: pd.Series, source: str) -> pd.Series:
         raise ValueError(f"{source} ticker values cannot be missing or blank.")
     return tickers.astype(str)
 
-
-__all__ = [
-    "BacktestMetrics",
-    "BacktestResult",
-    "expected_return_hurdle",
-    "run_backtest",
-]

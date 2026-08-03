@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import numpy as np
 import pandas as pd
 
@@ -37,17 +35,8 @@ RANK_FEATURE_COLUMNS = tuple(f"{column}_xrank" for column in STOCK_FEATURE_COLUM
 FEATURE_COLUMNS = STOCK_FEATURE_COLUMNS + RANK_FEATURE_COLUMNS + MARKET_FEATURE_COLUMNS
 
 
-def build_feature_panel(
-    prices: pd.DataFrame,
-    config: FeatureConfig | None = None,
-) -> pd.DataFrame:
-    """Build backward-looking features and next-open aligned labels.
-
-    All labels are calculated on the complete validated price history before
-    liquidity or universe eligibility is applied. Rows without a future label
-    are retained so inference and portfolio selection never depend on future
-    price availability.
-    """
+def build_feature_panel(prices: pd.DataFrame, config: FeatureConfig | None = None) -> pd.DataFrame:
+    """Build backward looking features and next open labels."""
     resolved = config or FeatureConfig()
     out = validate_prices(prices)
     out["horizon_sessions"] = resolved.holding_days
@@ -68,16 +57,12 @@ def _add_forward_labels(prices: pd.DataFrame, holding_days: int) -> pd.DataFrame
     calendar_rows: list[pd.DataFrame] = []
     for calendar, group in out.groupby(calendar_column, sort=False):
         dates = pd.Series(group["date"].drop_duplicates().sort_values().to_numpy())
-        calendar_rows.append(
-            pd.DataFrame(
-                {
-                    calendar_column: calendar,
-                    "date": dates,
-                    "entry_date": dates.shift(-1),
-                    "planned_exit_date": dates.shift(-(holding_days + 1)),
-                }
-            )
-        )
+        calendar_rows.append(pd.DataFrame({
+            calendar_column: calendar,
+            "date": dates,
+            "entry_date": dates.shift(-1),
+            "planned_exit_date": dates.shift(-(holding_days + 1)),
+        }))
     calendar_map = pd.concat(calendar_rows, ignore_index=True)
     out = out.merge(calendar_map, on=[calendar_column, "date"], how="left", validate="many_to_one")
 
@@ -85,19 +70,11 @@ def _add_forward_labels(prices: pd.DataFrame, holding_days: int) -> pd.DataFrame
     entry_lookup = price_lookup.rename(columns={"date": "entry_date", "adj_open": "entry_adj_open"})
     exit_lookup = price_lookup.rename(columns={"date": "planned_exit_date", "adj_open": "planned_exit_adj_open"})
     out = out.merge(entry_lookup, on=["ticker", "entry_date"], how="left", validate="many_to_one")
-    out = out.merge(
-        exit_lookup,
-        on=["ticker", "planned_exit_date"],
-        how="left",
-        validate="many_to_one",
-    )
+    out = out.merge(exit_lookup, on=["ticker", "planned_exit_date"], how="left", validate="many_to_one")
     out[LABEL_DATE_COLUMN] = out["planned_exit_date"]
     out["realized_exit_value"] = out["planned_exit_adj_open"]
     delisting_events = (
-        out.loc[
-            out["delisting_return"].notna(),
-            ["ticker", "date", "adj_close", "delisting_return"],
-        ].copy()
+        out.loc[out["delisting_return"].notna(), ["ticker", "date", "adj_close", "delisting_return"]].copy()
         if "delisting_return" in out.columns
         else pd.DataFrame()
     )
@@ -137,17 +114,13 @@ def _add_features(prices: pd.DataFrame) -> pd.DataFrame:
     out["momentum_12_1"] = grouped["adj_close"].shift(21) / grouped["adj_close"].shift(252) - 1
     out["vol_20d"] = grouped["ret_1d"].transform(lambda values: values.rolling(20).std())
     out["vol_60d"] = grouped["ret_1d"].transform(lambda values: values.rolling(60).std())
-    out["downside_vol_60d"] = grouped["ret_1d"].transform(
-        lambda values: np.sqrt(values.clip(upper=0).pow(2).rolling(60).mean())
-    )
+    out["downside_vol_60d"] = grouped["ret_1d"].transform(lambda values: np.sqrt(values.clip(upper=0).pow(2).rolling(60).mean()))
     moving_average_50 = grouped["adj_close"].transform(lambda values: values.rolling(50).mean())
     moving_average_200 = grouped["adj_close"].transform(lambda values: values.rolling(200).mean())
     out["ma_ratio_50_200"] = moving_average_50 / moving_average_200
     rolling_high = grouped["adj_close"].transform(lambda values: values.rolling(252).max())
     out["drawdown_252d"] = out["adj_close"] / rolling_high - 1
-    out["log_dollar_volume_20d"] = np.log1p(
-        grouped["raw_dollar_volume"].transform(lambda values: values.rolling(20).mean())
-    )
+    out["log_dollar_volume_20d"] = np.log1p(grouped["raw_dollar_volume"].transform(lambda values: values.rolling(20).mean()))
     dollar_volume_20 = grouped["raw_dollar_volume"].transform(lambda values: values.rolling(20).mean())
     dollar_volume_60 = grouped["raw_dollar_volume"].transform(lambda values: values.rolling(60).mean())
     out["dollar_volume_ratio_20_60"] = dollar_volume_20 / dollar_volume_60
@@ -190,9 +163,7 @@ def _add_eligibility(prices: pd.DataFrame, config: FeatureConfig) -> pd.DataFram
     out = prices.sort_values(["ticker", "date"]).copy()
     grouped = out.groupby("ticker", group_keys=False)
     out["history_days"] = grouped.cumcount() + 1
-    out["turnover_60d_median"] = grouped["raw_dollar_volume"].transform(
-        lambda values: values.rolling(config.liquidity_lookback_days).median()
-    )
+    out["turnover_60d_median"] = grouped["raw_dollar_volume"].transform(lambda values: values.rolling(config.liquidity_lookback_days).median())
     in_universe = out.get("in_universe", pd.Series(True, index=out.index)).astype(bool)
     feature_complete = out[list(STOCK_FEATURE_COLUMNS + MARKET_FEATURE_COLUMNS)].notna().all(axis=1)
     out["eligible"] = (
@@ -225,25 +196,6 @@ def _add_training_target(prices: pd.DataFrame, quantile: float) -> pd.DataFrame:
             return values
         return values.clip(values.quantile(quantile), values.quantile(1 - quantile))
 
-    winsorized.loc[usable] = (
-        out.loc[usable]
-        .groupby(
-            ["date", LABEL_DATE_COLUMN],
-            dropna=False,
-        )[RAW_RETURN_COLUMN]
-        .transform(clip_cross_section)
-    )
+    winsorized.loc[usable] = out.loc[usable].groupby(["date", LABEL_DATE_COLUMN], dropna=False)[RAW_RETURN_COLUMN].transform(clip_cross_section)
     out[TARGET_COLUMN] = winsorized
     return out
-
-
-__all__ = [
-    "FEATURE_COLUMNS",
-    "LABEL_DATE_COLUMN",
-    "MARKET_FEATURE_COLUMNS",
-    "RANK_FEATURE_COLUMNS",
-    "RAW_RETURN_COLUMN",
-    "STOCK_FEATURE_COLUMNS",
-    "TARGET_COLUMN",
-    "build_feature_panel",
-]

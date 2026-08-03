@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-from load_prices import load_all_prices
 
 BASE_FEATURE_COLS = ["ret_5d", "ret_20d", "ret_60d", "ret_120d", "ret_252d", "vol_20d", "vol_60d", "ma_ratio_50_200", "drawdown_252d", "log_dollar_volume_20d", "volume_ratio_20_60"]
 
@@ -41,10 +40,3 @@ def add_features(df: pd.DataFrame) -> pd.DataFrame:
     df["label_date_20d"] = g["date"].shift(-20)
     df["fwd_ret_20d"] = g["adj_close"].transform(lambda s: s.shift(-20) / s - 1)
     return df
-
-
-if __name__ == "__main__":
-    prices = load_all_prices()
-    feats = add_features(prices)
-    cols = ["ticker", "date", "adj_close"] + FEATURE_COLS + ["fwd_ret_20d"]
-    print(feats[cols].tail(10).to_string(index=False))

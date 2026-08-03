@@ -1,9 +1,12 @@
+import argparse
 from collections import Counter
+from pathlib import Path
 import time
 
 import pandas as pd
 from prettytable import PrettyTable
-from model import TOP_N, backtest_top_n, build_dataset, evaluate_predictions, holding_period_sweep, summarize_backtest, train_and_predict
+from holdout.load_prices import load_all_prices
+from holdout.model import TOP_N, backtest_top_n, build_dataset, evaluate_predictions, holding_period_sweep, summarize_backtest, train_and_predict
 
 
 class ProgressPrinter:
@@ -32,6 +35,26 @@ class ProgressPrinter:
             print(f"  fitting final {data['model']} on {data['rows']:,} rows ...", flush=True)
         elif event == "final_fit_done":
             print(f"  predictions ready for {data['rows']:,} test rows", flush=True)
+
+
+def load_prices(universe_path: Path | None) -> pd.DataFrame:
+    prices = load_all_prices()
+    if universe_path is None:
+        return prices
+
+    universe = pd.read_csv(universe_path, dtype={"ticker": str})
+    if "ticker" not in universe:
+        raise ValueError(f"Universe file {universe_path} needs a ticker column.")
+    tickers = set(universe["ticker"].dropna().str.strip()) - {""}
+    if not tickers:
+        raise ValueError(f"Universe file {universe_path} contains no tickers.")
+
+    available = set(prices["ticker"])
+    selected = prices[prices["ticker"].isin(tickers)].copy()
+    if selected.empty:
+        raise FileNotFoundError(f"No price files match the tickers in {universe_path}.")
+    print(f"> Universe {universe_path} | requested {len(tickers)} | available {len(tickers & available)}")
+    return selected
 
 
 def latest_signals(test, n: int = TOP_N):
@@ -181,9 +204,14 @@ def print_holding_period_sweep(sweep) -> None:
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser(description="Run the fixed holdout strategy")
+    parser.add_argument("--universe", type=Path, help="CSV file with a ticker column")
+    args = parser.parse_args()
+
     progress = ProgressPrinter()
     progress.start("Loading prices and building features")
-    df = build_dataset()
+    prices = load_prices(args.universe)
+    df = build_dataset(prices)
     progress.done("Loading prices and building features")
     print_dataset_summary(df)
 

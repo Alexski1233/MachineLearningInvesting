@@ -1,17 +1,10 @@
-from __future__ import annotations
-
 import numpy as np
 import pandas as pd
 import pytest
 
-from mlinvesting.config import ModelConfig
-from mlinvesting.features import FEATURE_COLUMNS, LABEL_DATE_COLUMN, TARGET_COLUMN
-from mlinvesting.model import (
-    date_balanced_sample_weights,
-    fit_latest_and_predict,
-    mean_rank_ic,
-    walk_forward_predict,
-)
+from walk_forward.config import ModelConfig
+from walk_forward.features import FEATURE_COLUMNS, LABEL_DATE_COLUMN, TARGET_COLUMN
+from walk_forward.model import date_balanced_sample_weights, fit_latest_and_predict, mean_rank_ic, walk_forward_predict
 
 
 def _synthetic_panel() -> pd.DataFrame:

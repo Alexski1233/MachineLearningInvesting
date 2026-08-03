@@ -4,7 +4,7 @@ import pandas as pd
 
 
 def load_price_directory(price_dir: str | Path) -> pd.DataFrame:
-    """Load a directory of immutable price snapshots into one panel."""
+    """Load all price CSV files into one frame."""
     directory = Path(price_dir)
     files = sorted(directory.glob("*.csv"))
     if not files:

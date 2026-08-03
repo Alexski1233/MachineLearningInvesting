@@ -1,59 +1,36 @@
-"""Run the historical simulation and latest stock selection."""
-
 from pathlib import Path
 
 import pandas as pd
+from prettytable import PrettyTable
 
-from mlinvesting.backtest import BacktestResult, expected_return_hurdle, run_backtest
-from mlinvesting.config import BacktestConfig, FeatureConfig, ModelConfig
-from mlinvesting.data import drop_invalid_price_rows
-from mlinvesting.io import load_price_directory
-from mlinvesting.model import fit_latest_and_predict
-from mlinvesting.pipeline import (
-    blend_ranked_signals,
-    momentum_predictions_for_dates,
-    run_research,
-)
+from walk_forward.backtest import BacktestResult, expected_return_hurdle, run_backtest
+from walk_forward.config import BacktestConfig, FeatureConfig, ModelConfig
+from walk_forward.data import drop_invalid_price_rows
+from walk_forward.io import load_price_directory
+from walk_forward.model import fit_latest_and_predict
+from walk_forward.pipeline import blend_ranked_signals, momentum_predictions_for_dates, run_research
 
 
-PROJECT_DIR = Path(__file__).resolve().parent
-PRICE_DIR = PROJECT_DIR.parent / "data" / "raw_prices"
-OUTPUT_DIR = PROJECT_DIR / "output"
+PROJECT_DIR = Path(__file__).resolve().parents[1]
+PRICE_DIR = PROJECT_DIR / "data" / "raw_prices"
+OUTPUT_DIR = PROJECT_DIR / "output" / "walk_forward"
 BACKTEST_START = "2020-01-02"
 ML_WEIGHT = 0.25
 
 
 def main() -> None:
-    """Print a realistic backtest followed by the latest candidates."""
     prices, dropped = drop_invalid_price_rows(load_price_directory(PRICE_DIR))
     if not dropped.empty:
-        print(
-            f"Ignored {len(dropped)} invalid historical price rows "
-            f"in {dropped['ticker'].nunique()} tickers."
-        )
+        print(f"Ignored {len(dropped)} invalid historical price rows in {dropped['ticker'].nunique()} tickers.")
 
     feature_config = FeatureConfig()
     model_config = ModelConfig(refit_every_signals=12)
-    backtest_config = BacktestConfig(
-        top_n=5,
-        buffer_n=8,
-        max_weight=0.35,
-        weighting_method="inverse_volatility",
-    )
+    backtest_config = BacktestConfig(top_n=5, buffer_n=8, max_weight=0.35, weighting_method="inverse_volatility")
 
     print(f"Running historical simulation from {BACKTEST_START}. This normally takes 5-10 minutes...")
-    research = run_research(
-        prices,
-        start_date=BACKTEST_START,
-        feature_config=feature_config,
-        model_config=model_config,
-        backtest_config=backtest_config,
-    )
-    hybrid_signals = blend_ranked_signals(
-        research.predictions,
-        research.momentum_predictions,
-        ML_WEIGHT,
-    )
+    research = run_research(prices, start_date=BACKTEST_START, feature_config=feature_config,
+                            model_config=model_config, backtest_config=backtest_config)
+    hybrid_signals = blend_ranked_signals(research.predictions, research.momentum_predictions, ML_WEIGHT)
     hybrid = run_backtest(prices, hybrid_signals, backtest_config)
     comparison = _comparison(hybrid, research.strategy, research.momentum_baseline)
     _print_backtest(comparison)
@@ -63,19 +40,13 @@ def main() -> None:
     latest_momentum = momentum_predictions_for_dates(research.panel, [signal_date], model_config)
     predictions = blend_ranked_signals(predictions, latest_momentum, ML_WEIGHT)
     predictions = predictions.sort_values(["score", "expected_return"], ascending=False).reset_index(drop=True)
-    predictions["entry_threshold"] = predictions["horizon_sessions"].map(
-        lambda horizon: expected_return_hurdle(int(horizon), backtest_config)
-    )
+    predictions["entry_threshold"] = predictions["horizon_sessions"].map(lambda horizon: expected_return_hurdle(int(horizon), backtest_config))
     candidates = predictions[predictions["expected_return"] > predictions["entry_threshold"]]
     _print_latest(signal_date, candidates, backtest_config.top_n)
     _save_results(comparison, predictions)
 
 
-def _comparison(
-    hybrid: BacktestResult,
-    pure_ml: BacktestResult,
-    momentum: BacktestResult,
-) -> pd.DataFrame:
+def _comparison(hybrid: BacktestResult, pure_ml: BacktestResult, momentum: BacktestResult) -> pd.DataFrame:
     rows = []
     for name, result in (
         ("hybrid_25_ml_75_momentum", hybrid),
@@ -91,14 +62,17 @@ def _print_backtest(comparison: pd.DataFrame) -> None:
     pure_ml = comparison.loc["pure_ml"]
     momentum = comparison.loc["pure_momentum"]
     print("\n=== Historical simulation after trading costs ===")
-    print(f"Total return:       {strategy['net_total_return']:.1%}")
-    print(f"EAR / annual return:{strategy['net_cagr']:>9.1%}")
-    print(f"Sharpe:             {strategy['daily_excess_sharpe']:>9.2f}")
-    print(f"Maximum drawdown:   {strategy['max_drawdown']:>9.1%}")
-    print(f"Trading costs:      {strategy['total_costs']:>12,.0f} NOK")
-    print(f"Ending value:       {strategy['ending_equity']:>12,.0f} NOK")
-    print(f"Pure ML EAR:        {pure_ml['net_cagr']:>9.1%}")
-    print(f"Momentum EAR:       {momentum['net_cagr']:>9.1%}")
+    rows = [
+        ("Total return", f"{strategy['net_total_return']:.1%}"),
+        ("EAR / annual return", f"{strategy['net_cagr']:.1%}"),
+        ("Sharpe", f"{strategy['daily_excess_sharpe']:.2f}"),
+        ("Maximum drawdown", f"{strategy['max_drawdown']:.1%}"),
+        ("Trading costs", f"{strategy['total_costs']:,.0f} NOK"),
+        ("Ending value", f"{strategy['ending_equity']:,.0f} NOK"),
+        ("Pure ML EAR", f"{pure_ml['net_cagr']:.1%}"),
+        ("Momentum EAR", f"{momentum['net_cagr']:.1%}"),
+    ]
+    _print_table(["Metric", "Value"], rows)
     print("Note: Historical membership data is missing, so survivorship bias may remain.")
 
 
@@ -111,18 +85,18 @@ def _print_latest(signal_date: pd.Timestamp, candidates: pd.DataFrame, top_n: in
     display["expected_20d"] = display["expected_return"].map(lambda value: f"{value:.2%}")
     display["minimum_needed"] = display["entry_threshold"].map(lambda value: f"{value:.2%}")
     display["score"] = display["score"].map(lambda value: f"{value:.3f}")
-    print(
-        display[["ticker", "expected_20d", "minimum_needed", "score"]]
-        .rename(
-            columns={
-                "ticker": "Ticker",
-                "expected_20d": "Expected 20d",
-                "minimum_needed": "Minimum needed",
-                "score": "Score",
-            }
-        )
-        .to_string(index=False)
-    )
+    rows = display[["ticker", "expected_20d", "minimum_needed", "score"]].itertuples(index=False, name=None)
+    _print_table(["Ticker", "Expected 20d", "Minimum needed", "Score"], rows)
+
+
+def _print_table(field_names: list[str], rows) -> None:
+    table = PrettyTable()
+    table.field_names = field_names
+    table.add_rows(list(rows))
+    table.align[field_names[0]] = "l"
+    for field in field_names[1:]:
+        table.align[field] = "r"
+    print(table)
 
 
 def _save_results(comparison: pd.DataFrame, predictions: pd.DataFrame) -> None:

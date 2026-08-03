@@ -6,8 +6,8 @@ from sklearn.linear_model import Ridge
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
-from features import BASE_FEATURE_COLS, FEATURE_COLS, add_features
-from load_prices import load_all_prices
+from .features import BASE_FEATURE_COLS, FEATURE_COLS, add_features
+from .load_prices import load_all_prices
 
 TRAIN_TEST_SPLIT = "2020-01-01"
 VALIDATION_YEARS = 3
@@ -194,11 +194,7 @@ def add_forward_return(df: pd.DataFrame, days: int) -> pd.DataFrame:
     return out
 
 
-def backtest_top_n(
-    test: pd.DataFrame,
-    n: int = TOP_N,
-    holding_days: int = REBALANCE_EVERY_DAYS,
-) -> pd.DataFrame:
+def backtest_top_n(test: pd.DataFrame, n: int = TOP_N, holding_days: int = REBALANCE_EVERY_DAYS) -> pd.DataFrame:
     """Simulate a long-only top-N strategy with periodic rebalancing.
 
     Every `holding_days` trading days, buy the n tickers with the
@@ -244,11 +240,7 @@ def annualized_return(bt: pd.DataFrame, holding_days: int) -> float:
     return bt["equity"].iloc[-1] ** (1 / years) - 1
 
 
-def holding_period_sweep(
-    test: pd.DataFrame,
-    periods: list[int] = HOLDING_PERIODS,
-    n: int = TOP_N,
-) -> pd.DataFrame:
+def holding_period_sweep(test: pd.DataFrame, periods: list[int] = HOLDING_PERIODS, n: int = TOP_N) -> pd.DataFrame:
     """Compare performance when holding the same ranked picks for N days."""
     rows = []
     for days in periods:
@@ -377,21 +369,3 @@ def _empty_metrics() -> dict:
         "top_n_hit_rate": np.nan,
         "top_n_positive_period_rate": np.nan,
     }
-
-
-if __name__ == "__main__":
-    df = build_dataset()
-    _, test, info = train_and_predict(df, return_diagnostics=True)
-    bt = backtest_top_n(test)
-    summary = summarize_backtest(bt)
-    accuracy = evaluate_predictions(test, info["train_target_mean"])
-    print(bt.tail().to_string(index=False))
-    print()
-    print(f"Selected model: {info['selected_model']}")
-    print(f"Directional accuracy: {accuracy['direction_accuracy']:.2%}")
-    print(f"Top-{TOP_N} hit rate: {accuracy['top_n_hit_rate']:.2%}")
-    print(f"Rank IC: {accuracy['rank_ic']:.3f}")
-    print(f"OOS R2: {accuracy['oos_r2']:.2%}")
-    print(f"Periods: {summary['periods']}")
-    print(f"Avg 20d ret: {summary['avg_20d_ret']:.2%}")
-    print(f"Total return: {summary['strategy_total_return']:.1%}")

@@ -3,13 +3,14 @@ requires = ["setuptools>=75"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "mlinvesting"
+name = "machine-learning-investing"
 version = "0.1.0"
-description = "Leak-aware, cost-aware machine-learning research for equity portfolios"
+description = "Machine learning research strategies for Nordic equities"
 requires-python = ">=3.11"
 dependencies = [
     "numpy>=2.0",
     "pandas>=2.2",
+    "prettytable>=3.0",
     "scikit-learn>=1.6",
 ]
 
@@ -17,7 +18,7 @@ dependencies = [
 dev = ["pytest>=8.0"]
 
 [project.scripts]
-mlinvesting = "mlinvesting.cli:main"
+walk-forward = "walk_forward.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
@@ -26,6 +27,3 @@ where = ["src"]
 pythonpath = ["src"]
 testpaths = ["tests"]
 
-[tool.ruff]
-line-length = 120
-target-version = "py311"

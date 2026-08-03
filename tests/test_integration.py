@@ -1,10 +1,8 @@
-from __future__ import annotations
-
 import numpy as np
 import pandas as pd
 
-from mlinvesting.config import BacktestConfig, FeatureConfig, ModelConfig
-from mlinvesting.pipeline import run_research
+from walk_forward.config import BacktestConfig, FeatureConfig, ModelConfig
+from walk_forward.pipeline import run_research
 
 
 def test_walk_forward_pipeline_runs_end_to_end_without_same_close_execution() -> None:

@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import numpy as np
 import pandas as pd
 
@@ -7,7 +5,7 @@ REQUIRED_PRICE_COLUMNS = ("ticker", "date", "open", "close", "adj_close", "volum
 
 
 def drop_invalid_price_rows(prices: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Remove unusable vendor rows before applying strict panel validation."""
+    """Remove unusable price rows."""
     missing = set(REQUIRED_PRICE_COLUMNS).difference(prices.columns)
     if missing:
         raise ValueError(f"Price data is missing columns: {sorted(missing)}")
@@ -41,7 +39,7 @@ def drop_invalid_price_rows(prices: pd.DataFrame) -> tuple[pd.DataFrame, pd.Data
 
 
 def validate_prices(prices: pd.DataFrame) -> pd.DataFrame:
-    """Validate and normalize a long-format point-in-time price panel."""
+    """Validate and normalize a long price table."""
     missing = set(REQUIRED_PRICE_COLUMNS).difference(prices.columns)
     if missing:
         raise ValueError(f"Price data is missing columns: {sorted(missing)}")
@@ -61,9 +59,7 @@ def validate_prices(prices: pd.DataFrame) -> pd.DataFrame:
         invalid = converted.isna() | ~np.isfinite(converted)
         if invalid.any():
             examples = out.loc[invalid, ["ticker", "date", column]].head(5)
-            raise ValueError(
-                f"Column {column!r} contains missing or non-finite values: {examples.to_dict(orient='records')}"
-            )
+            raise ValueError(f"Column {column!r} contains missing or non-finite values: {examples.to_dict(orient='records')}")
         out[column] = converted.astype(float)
 
     for column in ("open", "close", "adj_close", "high", "low"):
@@ -87,10 +83,7 @@ def validate_prices(prices: pd.DataFrame) -> pd.DataFrame:
     duplicate_keys = out.duplicated(["ticker", "date"], keep=False)
     if duplicate_keys.any():
         examples = out.loc[duplicate_keys, ["ticker", "date"]].head(5)
-        raise ValueError(
-            "Price data must contain one row per (ticker, date); duplicate examples: "
-            f"{examples.to_dict(orient='records')}"
-        )
+        raise ValueError(f"Price data must contain one row per (ticker, date); duplicate examples: {examples.to_dict(orient='records')}")
 
     if "exchange" in out.columns:
         out["exchange"] = out["exchange"].astype("string").str.strip()
@@ -103,9 +96,7 @@ def validate_prices(prices: pd.DataFrame) -> pd.DataFrame:
     if "in_universe" in out.columns:
         out["in_universe"] = _normalize_boolean(out["in_universe"], "in_universe")
     if "delisting_return" in out.columns:
-        missing_delisting_return = out["delisting_return"].isna() | out["delisting_return"].astype(
-            "string"
-        ).str.strip().eq("")
+        missing_delisting_return = out["delisting_return"].isna() | out["delisting_return"].astype("string").str.strip().eq("")
         delisting_return = pd.to_numeric(out["delisting_return"], errors="coerce")
         invalid = (~missing_delisting_return & delisting_return.isna()) | (
             delisting_return.notna() & (~np.isfinite(delisting_return) | (delisting_return < -1))
@@ -127,10 +118,7 @@ def validate_prices(prices: pd.DataFrame) -> pd.DataFrame:
     return out.sort_values(["ticker", "date"]).reset_index(drop=True)
 
 
-def attach_universe_membership(
-    prices: pd.DataFrame,
-    membership: pd.DataFrame,
-) -> pd.DataFrame:
+def attach_universe_membership(prices: pd.DataFrame, membership: pd.DataFrame) -> pd.DataFrame:
     """Attach inclusive point-in-time listing intervals to price rows."""
     required = {"ticker", "listed_from", "listed_to"}
     missing = required.difference(membership.columns)
@@ -143,10 +131,7 @@ def attach_universe_membership(
     if intervals["ticker"].isna().any() or intervals["ticker"].eq("").any():
         raise ValueError("Universe membership tickers cannot be missing or blank.")
     intervals["listed_from"] = _normalize_dates(intervals["listed_from"], "listed_from")
-    intervals["listed_to"] = _normalize_optional_dates(
-        intervals["listed_to"],
-        "listed_to",
-    )
+    intervals["listed_to"] = _normalize_optional_dates(intervals["listed_to"], "listed_to")
     invalid_interval = intervals["listed_to"].notna() & (intervals["listed_to"] < intervals["listed_from"])
     if invalid_interval.any():
         raise ValueError("listed_to cannot be earlier than listed_from.")
@@ -224,10 +209,3 @@ def _reject_overlapping_intervals(intervals: pd.DataFrame) -> None:
                 raise ValueError(f"Universe intervals overlap for ticker {ticker!r}.")
             previous_end = row.listed_to if pd.notna(row.listed_to) else pd.Timestamp.max.normalize()
 
-
-__all__ = [
-    "REQUIRED_PRICE_COLUMNS",
-    "attach_universe_membership",
-    "drop_invalid_price_rows",
-    "validate_prices",
-]
