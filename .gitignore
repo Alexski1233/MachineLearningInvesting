@@ -245,5 +245,6 @@ __marimo__/
 /parse_fundamentals.py
 /value_backtest.py
 
-# HIDE FOLDERS HERE
+# HIDE FOLDERS/FLES HERE
 archive
+AGENTS.md
